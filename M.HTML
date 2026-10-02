@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gửi Người BN CỦA TUI ✨❤️</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: #020208; 
+            overflow: hidden; 
+            font-family: 'Montserrat', 'Segoe UI', sans-serif;
+        }
+        #canvas-container { 
+            width: 100vw; 
+            height: 100vh; 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+        }
+        
+        .overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #fff;
+            z-index: 10;
+            pointer-events: none;
+            width: 85%;
+        }
+
+        /* Animation Đếm ngược */
+        .countdown {
+            font-size: 6rem;
+            font-weight: 900;
+            color: #ff3366;
+            text-shadow: 0 0 20px #ff3366, 0 0 50px #ff0055, 0 0 100px #ff0055;
+            animation: zoomPulse 1s infinite alternate cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+
+        /* Animation Text Gõ Chữ & Glow */
+        .message {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #ffffff;
+            text-shadow: 0 0 10px #ff6699, 0 0 20px #ff0055, 0 0 30px #ff0055;
+            min-height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            line-height: 1.4;
+        }
+
+        .typing-cursor {
+            display: inline-block;
+            width: 3px;
+            height: 2.2rem;
+            background-color: #ff3366;
+            margin-left: 5px;
+            animation: blink 0.8s infinite;
+        }
+
+        /* Keyframes */
+        @keyframes zoomPulse {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            100% { transform: scale(1.2); opacity: 1; }
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+    </style>
+    <!-- Thư viện Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+    <div id="canvas-container"></div>
+
+    <div class="overlay">
+        <div id="countdown" class="countdown">3</div>
+        <div class="message">
+            <span id="text"></span><span id="cursor" class="typing-cursor"></span>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. KHỞI TẠO CẢNH THREE.JS 3D ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        container.appendChild(renderer.domElement);
+
+        camera.position.z = 30;
+
+        // --- 2. TAO QUẢ CẦU VŨ TRỤ HẠT (STARFIELD / NEBULA) ---
+        const starsCount = 3000;
+        const starGeo = new THREE.BufferGeometry();
+        const starPos = new Float32Array(starsCount * 3);
+        const starColors = new Float32Array(starsCount * 3);
+
+        for (let i = 0; i < starsCount; i++) {
+            const r = 15 + Math.random() * 25;
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos((Math.random() * 2) - 1);
+
+            starPos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+            starPos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+            starPos[i * 3 + 2] = r * Math.cos(phi);
+
+            // Phối màu Tím - Hồng - Xanh Neon
+            starColors[i * 3] = 0.8 + Math.random() * 0.2; 
+            starColors[i * 3 + 1] = 0.2 + Math.random() * 0.5; 
+            starColors[i * 3 + 2] = 0.6 + Math.random() * 0.4; 
+        }
+
+        starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+        starGeo.setAttribute('color', new THREE.BufferAttribute(starColors, 3));
+
+        const starMat = new THREE.PointsMaterial({
+            size: 0.3,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.8
+        });
+
+        const starField = new THREE.Points(starGeo, starMat);
+        scene.add(starField);
+
+        // --- 3. TẠO TRÁI TIM 3D BẰNG HẠT (HEART PARTICLES) ---
+        const heartCount = 2000;
+        const heartGeo = new THREE.BufferGeometry();
+        const heartPos = new Float32Array(heartCount * 3);
+
+        // Công thức toán học tạo hình Trái tim 3D
+        for (let i = 0; i < heartCount; i++) {
+            const t = Math.random() * Math.PI * 2;
+            const u = (Math.random() - 0.5) * Math.PI;
+            
+            // Parametric Heart Equation
+            let x = 16 * Math.pow(Math.sin(t), 3);
+            let y = 13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t);
+            let z = u * 10;
+
+            // Scale trái tim
+            const scale = 0.5;
+            heartPos[i * 3] = x * scale;
+            heartPos[i * 3 + 1] = y * scale;
+            heartPos[i * 3 + 2] = z * scale;
+        }
+
+        heartGeo.setAttribute('position', new THREE.BufferAttribute(heartPos, 3));
+
+        const heartMat = new THREE.PointsMaterial({
+            size: 0.35,
+            color: 0xff0055,
+            transparent: true,
+            opacity: 0
+        });
+
+        const heartMesh = new THREE.Points(heartGeo, heartMat);
+        scene.add(heartMesh);
+
+        // --- 4. ANIMATION VÒNG LẶP (FRAME LOOP) ---
+        let clock = new THREE.Clock();
+        let showHeart = false;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const time = clock.getElapsedTime();
+
+            // Xoay dải ngân hà
+            starField.rotation.y = time * 0.05;
+            starField.rotation.x = time * 0.02;
+
+            if (showHeart) {
+                // Trái tim 3D xoay & Đập theo nhịp sinh học (Heartbeat)
+                heartMesh.rotation.y = time * 0.8;
+                const beat = 1 + Math.sin(time * 5) * 0.12; 
+                heartMesh.scale.set(beat, beat, beat);
+
+                if (heartMat.opacity < 0.95) {
+                    heartMat.opacity += 0.01; // Fade in trái tim
+                }
+            }
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // --- 5. ANIMATION GÕ CHỮ (TYPEWRITER EFFECT) ---
+        const textEl = document.getElementById('text');
+        const cursorEl = document.getElementById('cursor');
+        const countdownEl = document.getElementById('countdown');
+
+        const messages = [
+            "Vũ trụ có hàng tỷ ngôi sao...",
+            "Nhưng ngôi sao đẹp nhất...",
+            "Vẫn luôn là MAI ✨",
+            "CHÚC BN VÀ TUI ĐỀU THI ĐỖ 10/1 NHÉ? ❤️"
+        ];
+
+        let msgIdx = 0;
+        let charIdx = 0;
+
+        // Đếm ngược 3 - 2 - 1
+        let count = 3;
+        const countTimer = setInterval(() => {
+            count--;
+            if (count > 0) {
+                countdownEl.innerText = count;
+            } else {
+                clearInterval(countTimer);
+                countdownEl.style.display = 'none';
+                typeNextMessage();
+            }
+        }, 1000);
+
+        function typeNextMessage() {
+            if (msgIdx < messages.length) {
+                const currentMsg = messages[msgIdx];
+                
+                if (charIdx < currentMsg.length) {
+                    textEl.innerHTML += currentMsg.charAt(charIdx);
+                    charIdx++;
+                    setTimeout(typeNextMessage, 80); // Tốc độ gõ chữ (80ms/chữ)
+                } else {
+                    // Khi gõ hết 1 câu, chờ 2 giây rồi xóa chữ gõ câu mới
+                    setTimeout(() => {
+                        if (msgIdx < messages.length - 1) {
+                            textEl.innerHTML = '';
+                            charIdx = 0;
+                            msgIdx++;
+                            typeNextMessage();
+                        } else {
+                            // CÂU CUỐI CÙNG: Hiện hiệu ứng Trái tim 3D đập
+                            cursorEl.style.display = 'none';
+                            showHeart = true; 
+                        }
+                    }, 2000);
+                }
+            }
+        }
+
+        // Tự động điều chỉnh kích thước khi xoay màn hình điện thoại
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
